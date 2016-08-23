@@ -1,23 +1,18 @@
-Parsing-RepeatMasker-Outputs
+Parsing-RepeatMasker-Outputs => parseRM
 ========================================================
-Last update: 2014 April 28
+Last update: 2016 June 17
 
 
 Of interest if you are using the software Repeat Masker, for transposable elements (TEs) annotation [see http://www.repeatmasker.org/].
 These script may help refining a custom (de novo) TE library, but won't help you to actually make one.
 
-This is a collection of perl scripts I wrote for me and my lab (starting coding in Jan 2011)
-to facilitate TE annotation and the extraction of information from Repeat Masker output file ".out".
-Therefore, these are not perfect and are in constant development - many lack a good structure and subroutines
-(but I am working on it)
+This is a collection of perl scripts I wrote for me and my lab to facilitate TE annotation (see list below)
+and the extraction of information from Repeat Masker output file ".out".
 
-Below a list of the scripts.
-Note that for all of them:
-  - a complete usage will be obtained by simply launch them without any argument or option -h
-  - the change log of version can be read from the scripts (comments at the beginning), or with option -changelog
+Note that for all of the scripts, a complete usage will be obtained by simply launch them without any argument or option -h
 
 ========================================================
-parseRM.pl
+parseRM_simple.pl
 
     WHAT IT DOES
     Parse RepeatMasker outputs to get summary info for each repeat as well as masked amounts by class and family.
@@ -39,22 +34,33 @@ parseRM.pl
 
 parseRM_GetLandscape.pl
 
-    NOTE THAT IN THE LATEST REPEAT MASKER RELEASES, AN EQUIVALENT SCRIPT IS PROVIDED:
-    -> "the Kimura divergence is now calculated for each alignment and placed in the *.algn files, 
-    and we now make available our software for drawing repeat landscapes (util/createRepeateLandscape.pl)" 
-    [repeatmasker.org]
+    DEPRECATED - use parseRM.pl with the option --land instead
+
+========================================================
+parseRM.pl
+
+    WHAT IT DOES:
+    Parse RepeatMasker outputs .out but also .align which is much better for landscape graphs
+    Indeed, this scripts is replacing parseRM_GetLandscape.pl
+    and will ultimately replace parseRM_simple.pl as well - for now, it is too slow
+
+    There are 3 non exclusive parsings types (they can all be set):
+    --land  => to split the amount of DNA by bins of %div or My, allowing to generate landscape graphs
+              for each repeat name, family or class (one output for each)
+              Note that there is also a script from the Repeat Masker team (util/createRepeateLandscape.pl)
+			  But my script allows to set the size of the bins + the max. bin
+
+    --age   => to determine the amounts of DNA in a genome that is masked by repeats of 
+              different lineages / %divergence categories
+
+    --parse => [avoid using for now] to get a summary of the masking, as well as amount or DNA, 
+               counts of fragments, + several other details for each repeat name (all-repeats file), 
+               family, class and total amount (summary file)
+
+    Note: if all 3 options are set, there will be an additional output with bins by %div or My, 
+          but split by age cagtegories specified in the --age file instead of repeat name/family/class 
     
-    WHAT MY SCRIPT DOES: 
-        For each fragment (line of repeat masker output), amount of DNA masked is put in a bin, 
-        based on the % of divergence to the consenus of this fragment.
-        This is done per repeat and per class, as well as per lineage is -TEage is used (see detailed options with the fake -h)
-        This script generates outputs that are tabulated text files. 
-  	
-        If you have .aln files, you should correct the %div with CG correction (Kimura).
-        How: check you RM version
-  	    If > 4.0.5, it is included in the -aln files
-  	    If < 4.0.5, look in the RepeatMasker directory, Utils directory, called calcDivergenceFromAlign.pl and run it
-  	    			then run this script on the modified .out
+    Type perl parseRM.pl --help for a full usage
 
 ========================================================
 
@@ -98,10 +104,12 @@ parseRM_GetNesting.pl
 parseRM_Coverage.pl
 
     WHAT IT DOES: 
-        This script will create a file per repeat (Rname) and then use them to calculate coverage
-        Output files can be directly used to plot the coverage in R
+        This script will output the coverage of a repeat plotted on the consensus length
+        (if the plotting fails, -Rfile will output command lines for R to get the plots) 
+        It is identical to the script in the Utils of this repository: https://github.com/4ureliek/TEanalysis
+        Here, for a simple parsing of repeat masker output, use -type RMout
 
-        Check the usage for the many (such as filtering etc)!
+        Check the usage for the many options (such as filtering etc)!
         perl parseRM_Coverage.pl -h
 
     NOTE: 
